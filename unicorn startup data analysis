@@ -1,0 +1,142 @@
+Aboput the data 
+Unicorn startups are privately held companies with a valuation of $1 billion or more. The term "unicorn" was coined to represent the rarity of such companies, 
+as they were once considered rare and mythical. However, over the past decade, there has been a significant increase in the number of unicorn startups, 
+especially in the technology and e-commerce sectors. These companies are often seen as disruptors and game-changers in their respective industries and attract significant
+attention from investors and the media. Some well-known examples of unicorn startups include Uber, Airbnb, SpaceX, and Zoom.
+
+Quering the data 
+--  cleaning/correcting
+  UPDATE `our-bruin-395513.unicorn_companies.unicorn`
+  SET Country = 'united Kingdom' WHERE Country = 'London';
+
+--descriptive analysis 
+-- companies with highest valuation and their industry 
+  SELECT [Company] as company_name, [Valuation___B_] as value , [Industry] as sector 
+  FROM `our-bruin-395513.unicorn_companies.unicorn` 
+  order by Valuation___B_ DESC; 
+
+--total number of companies in each country and their total valuation 
+  SELECT [Country], COUNT(Company) AS Company_count, SUM(CAST( Valuation___B_ AS int)) as total_valuation
+  from  `our-bruin-395513.unicorn_companies.unicorn`
+  group by Country
+  ORDER BY company_count DESC;
+
+--number of companies joining each year 
+  SELECT EXTRACT(YEAR FROM (Date_joined)) as year, count (*) AS no_of_comp
+  from `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY year
+  ORDER BY year;
+
+--Top 5 most common industries in data set 
+  SELECT [industry], COUNT([Industry]) as num_of_industry
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Industry
+  ORDER BY num_of_industry DESC
+  LIMIT 5; 
+
+--temporal analysis 
+  SELECT EXTRACT (YEAR from(Date_joined)) AS year, AVG(Valuation___B_) AS avg_VALUE 
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY date_joined
+  ORDER BY Date_Joined
+
+--companies average valuation over time / correlation between joing year and valuation 
+
+  SELECT EXTRACT (YEAR from(Date_joined)) AS years, ROUND(AVG(Valuation___B_),3) AS avg_VALUE 
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY years
+  ORDER BY years
+
+--geographical Analysis 
+--top 5 countries with highest number of companies 
+  SELECT Country , count(company) as num_of_comp
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  group by country
+  order by num_of_comp DESC
+  Limit 5 
+
+  SELECT Country , AVG(Valuation___B_) as avgvalue_of_comp
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  group by country
+  order by num_of_comp DESC
+  Limit 5 
+
+--industry analysis
+--highest valuation 
+  SELECT INDUSTRY, AVG(Valuation___B_) as avg_value
+  from `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Industry
+  order by avg_value DESC
+  LIMIT 1;
+-- relation between industry and valuation 
+  SELECT INDUSTRY, AVG(Valuation___B_) as avg_value
+  from `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Industry
+  order by avg_value DESC
+
+--industries attracting more companies 
+  SELECT Industry, COUNT(Company) as num_of_comp
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Industry
+  ORDER BY NUM_OF_COMP DESC;
+
+--company perfomance analysis 
+
+-- TOP 20 Companies achieving highest valuation in least amount of years. 
+  SELECT Company,Industry , Valuation___B_, DATE_DIFF(CURRENT_DATE(), Date_Joined, year ) AS years_since_joining
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  ORDER BY Valuation___B_ DESC,  years_since_joining ASC
+  LIMIT 20;
+
+--Corelations 
+  --corelation in country and sector with most companies
+  SELECT Country, Industry, COUNT(COMPANY) AS num_of_companies,
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Country, Industry
+  ORDER BY num_of_companies DESC, Country; 
+
+  --corelation in country and sector with most companies along with thier avg_valuation 
+  SELECT Country, Industry, COUNT(COMPANY) AS num_of_companies, ROUND(AVG(Valuation___B_),3) AS AVG_VALUE_OF_SECTOR
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Country, Industry
+  ORDER BY num_of_companies DESC, Country; 
+
+  --Corelation in industry/sector and valuation , finding which industry has highest valuation 
+
+  SELECT Industry, ROUND(AVG(Valuation___B_),3) AS AVG_VALUE_OF_industry 
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Industry
+  ORDER BY AVG_VALUE_OF_industry  DESC;  
+
+
+
+
+
+
+--investor analysis 
+
+--top investors based on number of companies they have invested in 
+  SELECT Select_investors, count(company) as companies
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY Select_Investors
+  ORDER BY companies DESC;
+
+SELECT Select_Investors
+FROM `our-bruin-395513.unicorn_companies.unicorn`
+(SPLIT(Select_Investors, ',')) investor
+
+  SELECT UNNEST(SPLIT(Select_Investors, ',')) as investor
+  FROM `our-bruin-395513.unicorn_companies.unicorn`
+  GROUP BY investor  COUNT(Company) AS Number_of_Companies
+  ORDER BY Number_of_Companies DESC
+  LIMIT 10;
+
+SELECT SPLIT(Select_Investors, ',') as investors
+FROM `our-bruin-395513.unicorn_companies.unicorn`
+
+
+
+SELECT Select_Investors, TRIM(value) AS investor_name
+FROM `our-bruin-395513.unicorn_companies.unicorn`
+UNNEST(SPLIT("Select_investors", ',')) AS value;
+
